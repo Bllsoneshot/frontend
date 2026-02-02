@@ -1,7 +1,6 @@
 :root {
-  --font-sans:
-    Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR",
-    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-sans: Pretendard, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 
   --color-error: #d12923;
 
