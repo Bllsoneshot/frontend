@@ -17,7 +17,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {children ?? title}
       </StyledButton>
     );
-  },
+  }
 );
 
 const variantStyles: Record<ButtonVariant, ReturnType<typeof css>> = {
@@ -80,11 +80,8 @@ const StyledButton = styled.button<{ $variant: ButtonVariant }>`
 
   cursor: pointer;
 
-  transition:
-    background-color 160ms ease,
-    color 160ms ease,
-    box-shadow 160ms ease,
-    transform 80ms ease;
+  transition: background-color 160ms ease, color 160ms ease,
+    box-shadow 160ms ease, transform 80ms ease;
 
   &:active:not(:disabled) {
     transform: translateY(1px);
