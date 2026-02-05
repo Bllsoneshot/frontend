@@ -2,8 +2,8 @@ import { forwardRef, useId } from "react";
 import type { InputHTMLAttributes } from "react";
 import styled from "styled-components";
 
-import checkOn from "../assets/images/icon/checkbox_checked.svg";
-import checkOff from "../assets/images/icon/checkbox_default.svg";
+import checkOn from "../assets/checkbox_checked.svg";
+import checkOff from "../assets/checkbox_default.svg";
 
 interface CheckboxProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -79,8 +79,8 @@ const Label = styled.label<{ $disabled: boolean }>`
 `;
 
 const Icon = styled.img`
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   display: block;
 `;
 

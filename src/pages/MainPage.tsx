@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
-import BottomSheet from "../components/BottomSheet"; // 분리한 파일 import
+import BottomSheet from "../components/mentee/BottomSheet"; // 분리한 파일 import
 import TodoForm from "../components/TodoForm";
 
 // 모바일 화면 시뮬레이션 컨테이너
