@@ -1,7 +1,9 @@
 import styled, { css } from "styled-components";
 
-import MonthIcon from "../assets/images/icon/month.svg?react";
-import WeekIcon from "../assets/images/icon/week.svg?react";
+import monthOff from "../assets/images/icon/month.svg";
+import monthOn from "../assets/images/icon/month_on.svg";
+import weekOff from "../assets/images/icon/week.svg";
+import weekOn from "../assets/images/icon/week_on.svg";
 
 export type ViewMode = "month" | "week";
 
@@ -18,16 +20,12 @@ const ScheduleToggle = ({ value, onChange, className }: Props) => {
     <Wrap className={className}>
       <Slider $pos={value} />
 
-      <Item type="button" $side="left" onClick={() => onChange("month")}>
-        <IconWrap $active={isMonth}>
-          <MonthIcon />
-        </IconWrap>
+      <Item type="button" onClick={() => onChange("month")}>
+        <Icon src={isMonth ? monthOn : monthOff} alt="월간" />
       </Item>
 
-      <Item type="button" $side="right" onClick={() => onChange("week")}>
-        <IconWrap $active={!isMonth}>
-          <WeekIcon />
-        </IconWrap>
+      <Item type="button" onClick={() => onChange("week")}>
+        <Icon src={!isMonth ? weekOn : weekOff} alt="주간" />
       </Item>
     </Wrap>
   );
@@ -38,10 +36,10 @@ const Wrap = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
 
-  width: 64px;
-  padding: 5px 0px;
+  width: 80px;
+  padding: 8px 0px;
 
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--color-gray-100);
 
   transition: background-color 180ms ease;
@@ -50,17 +48,15 @@ const Wrap = styled.div`
 const Slider = styled.div<{ $pos: ViewMode }>`
   position: absolute;
   top: 4px;
-  left: 5px;
+  left: 4px;
 
-  width: calc(52% - 10px);
-  height: calc(100% - 8.5px);
+  width: calc(50% - 8px);
+  height: calc(100% - 8px);
 
   border-radius: 4px;
   background: var(--color-white);
 
-  transition:
-    transform 220ms ease,
-    box-shadow 220ms ease;
+  transition: transform 220ms ease, box-shadow 220ms ease;
 
   box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.15);
 
@@ -71,7 +67,7 @@ const Slider = styled.div<{ $pos: ViewMode }>`
     `}
 `;
 
-const Item = styled.button<{ $side?: "left" | "right" }>`
+const Item = styled.button`
   position: relative;
   z-index: 1;
 
@@ -87,20 +83,6 @@ const Item = styled.button<{ $side?: "left" | "right" }>`
   padding: 0;
   cursor: pointer;
 
-  ${({ $side }) =>
-    $side === "left" &&
-    `
-      justify-content: flex-end;
-      padding-right: 5px;
-    `}
-
-  ${({ $side }) =>
-    $side === "right" &&
-    `
-      justify-content: flex-start;
-      padding-left: 6px;
-    `}
-
   &:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px var(--color-primary-200);
@@ -108,20 +90,10 @@ const Item = styled.button<{ $side?: "left" | "right" }>`
   }
 `;
 
-const IconWrap = styled.span<{ $active: boolean }>`
-  width: 20px;
-  height: 22px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  color: ${({ $active }) =>
-    $active ? "var(--color-primary-500)" : "var(--color-gray-400)"};
-
-  & > svg path {
-    stroke: currentColor;
-  }
+const Icon = styled.img`
+  width: 24px;
+  height: 24px;
+  display: block;
 `;
 
 export default ScheduleToggle;
