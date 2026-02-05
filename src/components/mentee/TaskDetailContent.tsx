@@ -35,7 +35,6 @@ interface TaskDetailProps {
   onDelete?: () => void;
 }
 
-// --- Styled Components ---
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -186,8 +185,6 @@ const ActionButton = styled.button<{ $variant: "secondary" | "danger" }>`
         `}
 `;
 
-// --- Component ---
-
 const TaskDetailContent: React.FC<TaskDetailProps> = ({
   data,
   onOpenPhotoUpload,
@@ -195,6 +192,12 @@ const TaskDetailContent: React.FC<TaskDetailProps> = ({
   onDelete,
 }) => {
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
+
+  const SUBJECT_LABELS: Record<string, string> = {
+    KOREAN: "국어",
+    MATH: "수학",
+    ENGLISH: "영어",
+  };
 
   // 피드백이 존재하면(!data.mentorFeedback) 업로드 버튼을 숨깁니다.
   const shouldShowUpload = !data.mentorFeedback;
@@ -236,7 +239,7 @@ const TaskDetailContent: React.FC<TaskDetailProps> = ({
       <InfoList>
         <InfoRow>
           <Label>과목</Label>
-          <Value>{data.subject}</Value>
+          <Value>{SUBJECT_LABELS[data.subject]}</Value>
         </InfoRow>
         <InfoRow>
           <Label>목표 설정 시간</Label>
