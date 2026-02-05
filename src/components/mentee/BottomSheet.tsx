@@ -44,9 +44,9 @@ const BottomSheetWrapper = styled.div.attrs<{
 
 const Container = styled.div`
   width: 100%;
-  /* 높이는 내용물에 따라 늘어나도록 min-height로 변경하거나 고정 유지 가능 */
-  /* 여기서는 기존 디자인 유지를 위해 기존 값 유지하되, 필요 시 auto로 변경 권장 */
-  height: 349px;
+  /* 높이는 내용물에 따라 늘어나도록 설정 */
+  min-height: 349px;
+  height: auto;
   background-color: var(--color-white);
   border-radius: 20px 20px 0 0;
   padding: 12px 16px 0px;

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 import { typography } from "../styles/typography";
-import type { SubjectKey } from "./SubjectAddButton";
+
+export type SubjectKey = "KOREAN" | "ENGLISH" | "MATH";
 
 interface SubjectItem {
   key: SubjectKey;
