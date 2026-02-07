@@ -205,6 +205,7 @@ export default function TodoCreateSection() {
 
 const Wrap = styled.section`
   width: 100%;
+  margin-bottom: 50px;
 `;
 
 const FormGrid = styled.div`
@@ -254,12 +255,11 @@ const ToggleText = styled.span`
 `;
 
 const InfoDot = styled.span`
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-primary-500) 20%, transparent);
-  border: 1px solid
-    color-mix(in srgb, var(--color-primary-500) 60%, transparent);
+  background: color-mix(in srgb, var(--color-primary-50), transparent);
+  border: 1px solid var(--color-primary-500);
   position: relative;
 
   &::after {

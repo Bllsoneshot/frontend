@@ -90,20 +90,15 @@ const ItemLink = styled(NavLink)`
   text-decoration: none;
 
   &:hover {
-    background: var(--color-gray-50);
+    background: color-mix(in srgb, var(--color-primary-100) 50%, white);
   }
 
   &.active {
-    background: color-mix(in srgb, var(--color-primary-50) 55%, white);
+    background: color-mix(in srgb, var(--color-primary-50), white);
   }
 
   &.active:hover {
-    background: color-mix(in srgb, var(--color-primary-50) 55%, white);
-  }
-
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--color-primary-200);
+    background: color-mix(in srgb, var(--color-primary-100), white);
   }
 `;
 

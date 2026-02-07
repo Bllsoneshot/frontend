@@ -1,10 +1,22 @@
 import styled from "styled-components";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet, useParams } from "react-router-dom";
 
 import MenteeInfo from "../../components/mentor/MenteeInfo";
 import MenteeSideMenuBar from "../../components/mentor/SideBar";
+import {
+  getMockMenteeById,
+  toMenteeInfoData,
+} from "../../mock/menteeDashboard.mock";
 
 const MenteeDetailPage = () => {
+  const { menteeId } = useParams<{ menteeId: string }>();
+
+  const row = menteeId ? getMockMenteeById(menteeId) : null;
+
+  if (!row) return <Navigate to="/mentor/dashboard" replace />;
+
+  const menteeInfo = toMenteeInfoData(row);
+
   return (
     <Wrap>
       <RightTop style={{ minHeight: 25 }}>
@@ -13,13 +25,7 @@ const MenteeDetailPage = () => {
 
       <Grid>
         <LeftPanel>
-          <MenteeInfo
-            data={{
-              name: "김민수",
-              gradeLabel: "고등학교 3학년",
-              subjects: ["국어", "영어", "수학"],
-            }}
-          />
+          <MenteeInfo data={menteeInfo} />
           <MenteeSideMenuBar />
         </LeftPanel>
 
@@ -84,7 +90,6 @@ const LeftPanel = styled.aside`
 `;
 
 const RightPanel = styled.section`
-  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
@@ -98,7 +103,7 @@ const RightPanel = styled.section`
 `;
 
 const RightBody = styled.div`
-  padding: 16px 24px 24px;
+  padding: 0 24px 24px;
   box-sizing: border-box;
 `;
 
