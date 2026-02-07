@@ -1,8 +1,9 @@
 import styled from "styled-components";
-import { typography } from "../styles/typography";
+import type { ReactNode } from "react";
 
 interface Props {
-  label: string;
+  label?: string;
+  children?: ReactNode;
   selected?: boolean;
   onClick?: () => void;
   disabled?: boolean;
@@ -11,6 +12,7 @@ interface Props {
 
 const SquareChip = ({
   label,
+  children,
   selected = false,
   onClick,
   disabled = false,
@@ -23,14 +25,14 @@ const SquareChip = ({
       className={className}
       $selected={selected}
     >
-      {label}
+      {children ?? label}
     </Btn>
   );
 };
 
 const Btn = styled.button<{ $selected: boolean }>`
   width: 100%;
-  height: 45px;
+  height: 133px;
 
   border-radius: 6px;
   border: 1.5px solid
@@ -42,10 +44,11 @@ const Btn = styled.button<{ $selected: boolean }>`
       ? "color-mix(in srgb, var(--color-primary-50), transparent)"
       : "transparent"};
 
-  color: var(--color-gray-600);
   font-family: Pretendard;
 
-  ${({ $selected }) => ($selected ? typography.t14sb : typography.t14r)};
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   cursor: pointer;
   user-select: none;

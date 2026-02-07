@@ -40,8 +40,9 @@ const Card = styled.div`
   border-radius: 12px;
   padding: 18px 18px 16px;
   box-sizing: border-box;
+  text-align: left;
 
-  background: linear-gradient(180deg, #9fe5a3 0%, #63b07c 100%);
+  background: linear-gradient(332deg, #2aa971 0%, #7ee298 100%);
   color: var(--color-white);
 
   display: flex;

@@ -35,15 +35,23 @@ export default function MentorLayout() {
   const mentorName = me?.name ?? (loading ? "불러오는 중..." : "멘토");
 
   return (
-    <>
+    <Wrap>
       <Header mentorName={mentorName} />
       <Main>
         <Outlet />
       </Main>
-    </>
+    </Wrap>
   );
 }
 
+const Wrap = styled.div`
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+`;
+
 const Main = styled.main`
-  padding-top: 64px;
+  height: calc(100vh - 64px);
+  margin-top: 64px;
+  overflow: hidden;
 `;

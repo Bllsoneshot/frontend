@@ -5,6 +5,8 @@ import MentorDashboardPage from "./pages/mentor/MentorDashboardPage";
 import PublicRoute from "./components/auth/PublicRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import MentorLayout from "./layout/MentorLayout";
+import MenteeDetailPage from "./pages/mentor/MenteeDetailPage";
+import TodoCreateSection from "./components/mentor/sections/TodoCreateSection";
 
 function App() {
   return (
@@ -29,7 +31,17 @@ function App() {
         }
       >
         <Route path="dashboard" element={<MentorDashboardPage />} />
-        {/* <Route path="mentees/:menteeId" element={<MentorMenteeDetailPage />} /> */}
+        {/* 멘티 상세 */}
+        <Route path="mentees/:menteeId" element={<MenteeDetailPage />}>
+          {/* 기본 진입 시: 할일 등록으로 보내기 */}
+          <Route index element={<Navigate to="todo" replace />} />
+
+          <Route path="todo" element={<TodoCreateSection />} />
+          {/* 나머지는 추후 구현 */}
+          {/* <Route path="plan" element={<div style={{ padding: 24 }}>주간 학습 계획</div>} /> */}
+          {/* <Route path="resources" element={<div style={{ padding: 24 }}>자료 관리</div>} /> */}
+          {/* <Route path="reports" element={<div style={{ padding: 24 }}>주간 학습 리포트 발송</div>} /> */}
+        </Route>
       </Route>
 
       {/* 3. 루트 경로 (멘티 메인) */}
