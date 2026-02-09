@@ -113,6 +113,17 @@ interface FeedbackDetailInfo {
 }
 
 const MainPage = () => {
+  const [calendarViewMode, setCalendarViewMode] = useState<"week" | "month">(
+    "week",
+  );
+  const [calendarMonthDate, setCalendarMonthDate] = useState<Date>(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+  const [monthRemainingMap, setMonthRemainingMap] = useState<
+    Record<string, number>
+  >({});
+
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"DETAIL" | "FORM">("FORM");
   const [isToggle, setIsToggle] = useState(false);
@@ -176,6 +187,12 @@ const MainPage = () => {
 
   useEffect(() => {
     refreshTasks();
+  }, [selectedDate]);
+
+  useEffect(() => {
+    setCalendarMonthDate(
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
+    );
   }, [selectedDate]);
 
   const handleCardClick = (taskId: number) => {
@@ -341,26 +358,89 @@ const MainPage = () => {
     setTimeout(() => setFeedbackDetailInfo(null), 300);
   };
 
+  const getMonthDays = (monthDate: Date) => {
+    const y = monthDate.getFullYear();
+    const m = monthDate.getMonth();
+    const last = new Date(y, m + 1, 0).getDate();
+    return Array.from({ length: last }, (_, i) => new Date(y, m, i + 1));
+  };
+
+  const toKey = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const formatMonthDay = (d: Date) => `${d.getMonth() + 1}월 ${d.getDate()}일`;
+
+  useEffect(() => {
+    if (calendarViewMode !== "month") return;
+
+    let ignore = false;
+
+    (async () => {
+      try {
+        const days = getMonthDays(calendarMonthDate);
+
+        const results = await Promise.all(
+          days.map(async (d) => {
+            const res = await getTasksByDate(d);
+            const remaining = Math.max(
+              0,
+              res.taskAmount - res.completedTaskAmount,
+            );
+            return [toKey(d), remaining] as const;
+          }),
+        );
+
+        if (ignore) return;
+
+        const map: Record<string, number> = {};
+        results.forEach(([k, v]) => {
+          map[k] = v;
+        });
+
+        setMonthRemainingMap(map);
+      } catch (e) {
+        console.error("월간 미완료 개수 로딩 실패", e);
+        if (!ignore) setMonthRemainingMap({});
+      }
+    })();
+
+    return () => {
+      ignore = true;
+    };
+  }, [calendarViewMode, calendarMonthDate]);
+
   return (
     <MobileScreen>
       <Header />
       <Calendar
         selectedDate={selectedDate}
         onDateClick={(d) => setSelectedDate(new Date(d))}
+        viewMode={calendarViewMode}
+        onChangeViewMode={setCalendarViewMode}
+        monthDate={calendarMonthDate}
+        onChangeMonthDate={setCalendarMonthDate}
+        remainingCountByDate={monthRemainingMap}
       />
-      <DashboardWrapper>
-        <Dashboard
-          summary={dashboardSummary ?? undefined}
-          loading={isLoading}
-          onClickSubjectStats={() => {
-            // TODO: 과목별 통계 페이지 이동
-            console.log("과목별 통계 클릭");
-          }}
-        />
-      </DashboardWrapper>
+      {calendarViewMode === "week" ? (
+        <DashboardWrapper>
+          <Dashboard
+            summary={dashboardSummary ?? undefined}
+            loading={isLoading}
+            onClickSubjectStats={() => console.log("과목별 통계 클릭")}
+          />
+        </DashboardWrapper>
+      ) : null}
       <TodoSectionWrapper $lock={anyOverlayOpen}>
         <ToggleSwitchWrapper>
-          <ToggleSwitchLabel>오늘 할 일</ToggleSwitchLabel>
+          <ToggleSwitchLabel>
+            {calendarViewMode === "month"
+              ? formatMonthDay(selectedDate)
+              : "오늘 할 일"}
+          </ToggleSwitchLabel>
           <ToggleSwitchLabel>완료한 할 일 보기</ToggleSwitchLabel>
           <ToggleSwitch on={isToggle} onChange={setIsToggle} />
         </ToggleSwitchWrapper>
