@@ -30,7 +30,7 @@ interface PhotoUploadOverlayProps {
   onSave: (
     finalImages: string[],
     files: File[],
-    markersData: ImageMarkerData[],
+    markersData: ImageMarkerData[]
   ) => void;
   subject: string;
   title: string;
@@ -254,7 +254,7 @@ const PhotoUploadOverlay: React.FC<PhotoUploadOverlayProps> = ({
     y: number;
   } | null>(null);
   const [editingMarkerIndex, setEditingMarkerIndex] = useState<number | null>(
-    null,
+    null
   );
 
   // 제한 초과 경고 표시 상태
@@ -398,7 +398,7 @@ const PhotoUploadOverlay: React.FC<PhotoUploadOverlayProps> = ({
     // 드래그 여부 확인 (5px 이상 움직였으면 클릭 무시)
     const dist = Math.sqrt(
       Math.pow(e.clientX - dragStartPos.current.x, 2) +
-        Math.pow(e.clientY - dragStartPos.current.y, 2),
+        Math.pow(e.clientY - dragStartPos.current.y, 2)
     );
     if (dist > 5) return;
 
@@ -423,11 +423,11 @@ const PhotoUploadOverlay: React.FC<PhotoUploadOverlayProps> = ({
             ? {
                 ...data,
                 markers: data.markers.map((marker, mIdx) =>
-                  mIdx === editingMarkerIndex ? { ...marker, content } : marker,
+                  mIdx === editingMarkerIndex ? { ...marker, content } : marker
                 ),
               }
-            : data,
-        ),
+            : data
+        )
       );
     } else if (pendingPosition) {
       const newMarker: QuestionMarker = {
@@ -439,8 +439,8 @@ const PhotoUploadOverlay: React.FC<PhotoUploadOverlayProps> = ({
         prev.map((data, idx) =>
           idx === currentIndex
             ? { ...data, markers: [...data.markers, newMarker] }
-            : data,
-        ),
+            : data
+        )
       );
     }
 
@@ -462,11 +462,11 @@ const PhotoUploadOverlay: React.FC<PhotoUploadOverlayProps> = ({
           ? {
               ...data,
               markers: data.markers.filter(
-                (_, mIdx) => mIdx !== editingMarkerIndex,
+                (_, mIdx) => mIdx !== editingMarkerIndex
               ),
             }
-          : data,
-      ),
+          : data
+      )
     );
     setIsPopupOpen(false);
     setEditingMarkerIndex(null);
