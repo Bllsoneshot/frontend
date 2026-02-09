@@ -14,6 +14,7 @@ import {
   type TaskFeedbackDetailData,
   type TaskFeedbackItem,
 } from "../../api/task";
+import { createPortal } from "react-dom";
 
 interface BadgeVM {
   id: string;
@@ -201,8 +202,6 @@ const FeedbackDetailOverlay = ({
     };
   }, [isOpen, taskId]);
 
-  // if (!isOpen) return null;
-
   const hasPhotos = (data?.photos?.length ?? 0) > 0;
 
   const shouldShowOverall = hasPhotos ? activePhotoIndex === 0 : true;
@@ -229,7 +228,9 @@ const FeedbackDetailOverlay = ({
   const shouldShowPhotoFeedback =
     hasPhotos && (activePhotoFeedbackSection?.items?.length ?? 0) > 0;
 
-  return (
+  if (!isOpen) return null;
+
+  return createPortal(
     <Container $isOpen={isOpen}>
       <TodoDetailHeader
         title={title || data?.todoTitle || ""}
@@ -302,18 +303,19 @@ const FeedbackDetailOverlay = ({
           </>
         ) : null}
       </Body>
-    </Container>
+    </Container>,
+    document.body,
   );
 };
 
 const Container = styled.div<{ $isOpen: boolean }>`
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: var(--color-white);
-  z-index: 9999;
+  z-index: 1000;
 
   display: flex;
   flex-direction: column;
@@ -321,6 +323,8 @@ const Container = styled.div<{ $isOpen: boolean }>`
   transform: ${({ $isOpen }) =>
     $isOpen ? "translateY(0)" : "translateY(100%)"};
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+
+  pointer-events: ${({ $isOpen }) => ($isOpen ? "auto" : "none")};
 `;
 
 const Body = styled.main`
