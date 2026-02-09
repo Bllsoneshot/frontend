@@ -66,7 +66,10 @@ const ResourceListTable = ({
               <TrBody
                 key={row.resourceId}
                 $clickable={!!onRowClick}
-                onClick={() => onRowClick?.(row)}
+                onClick={() => {
+                  console.log("[ResourceListTable] row clicked:", row);
+                  onRowClick?.(row);
+                }}
               >
                 <Td $align="left">{row.title}</Td>
                 <Td $align="center">{row.createdAtLabel}</Td>
@@ -75,7 +78,10 @@ const ResourceListTable = ({
                   <Actions>
                     <ActionBtnWrap>
                       <Button
-                        onClick={() => onEdit?.(row)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit?.(row);
+                        }}
                         disabled={!onEdit}
                         title="수정"
                         style={{
@@ -99,7 +105,10 @@ const ResourceListTable = ({
                         fontWeight: 600,
                         lineHeight: "21px",
                       }}
-                      onClick={() => onDelete?.(row)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete?.(row);
+                      }}
                     />
                   </Actions>
                 </Td>

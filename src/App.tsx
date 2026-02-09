@@ -43,6 +43,10 @@ function App() {
           <Route path="resources" element={<ResourceSection />} />
           <Route path="resources/new" element={<ResourceCreateForm />} />
           <Route
+            path="resources/:resourceId/edit"
+            element={<ResourceCreateForm />}
+          />
+          <Route
             path="resources/:resourceId"
             element={<ResourceDetailView />}
           />
