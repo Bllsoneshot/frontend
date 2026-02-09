@@ -15,6 +15,7 @@ import {
   type TaskFeedbackItem,
 } from "../../api/task";
 import { createPortal } from "react-dom";
+import { getFileUrl } from "../../api/file";
 
 interface BadgeVM {
   id: string;
@@ -56,21 +57,25 @@ interface OverlayVM {
   >;
 }
 
-// 파일 다운로드 api 연동 후 지울 예정
-function getProofShotImageUrl(imageFileId: number) {
-  if (typeof imageFileId === "string") return imageFileId;
-
-  return `${import.meta.env.VITE_API_URL}/files/${imageFileId}`;
-}
-
 function onlyRegisteredFeedbacks(feedbacks: TaskFeedbackItem[]) {
   return (feedbacks ?? []).filter((f) => f.registerStatus === "REGISTERED");
 }
 
-function transformToOverlayVM(api: TaskFeedbackDetailData): OverlayVM {
+async function transformToOverlayVM(
+  api: TaskFeedbackDetailData,
+): Promise<OverlayVM> {
   const proofShots = api.proofShots ?? [];
 
-  const photos = proofShots.map((ps) => getProofShotImageUrl(ps.imageFileId));
+  const photos = await Promise.all(
+    proofShots.map(async (ps) => {
+      try {
+        return await getFileUrl(ps.imageFileId);
+      } catch (e) {
+        console.error("이미지 URL 조회 실패:", ps.imageFileId, e);
+        return ""; // 실패 시 빈 문자열
+      }
+    }),
+  );
 
   const badgesByPhoto: Record<number, BadgeVM[]> = {};
   const photoQnAByPhoto: Record<
@@ -186,7 +191,10 @@ const FeedbackDetailOverlay = ({
         const apiData = await fetchTaskFeedbackDetail(taskId);
         if (ignore) return;
 
-        setData(transformToOverlayVM(apiData));
+        const vm = await transformToOverlayVM(apiData);
+        if (ignore) return;
+
+        setData(vm);
       } catch (e) {
         console.error(e);
         if (ignore) return;
@@ -202,7 +210,7 @@ const FeedbackDetailOverlay = ({
     };
   }, [isOpen, taskId]);
 
-  const hasPhotos = (data?.photos?.length ?? 0) > 0;
+  const hasPhotos = (data?.photos?.filter(Boolean).length ?? 0) > 0;
 
   const shouldShowOverall = hasPhotos ? activePhotoIndex === 0 : true;
 
@@ -247,7 +255,12 @@ const FeedbackDetailOverlay = ({
             {hasPhotos ? (
               <PhotoArea>
                 <PhotoFrame>
-                  <Photo src={data.photos[activePhotoIndex]} alt="" />
+                  {data.photos[activePhotoIndex] ? (
+                    <Photo src={data.photos[activePhotoIndex]} alt="" />
+                  ) : (
+                    <StateText>이미지를 불러오지 못했습니다.</StateText>
+                  )}
+
                   {activeBadges.map((b) => (
                     <BadgeSpot
                       key={b.id}
