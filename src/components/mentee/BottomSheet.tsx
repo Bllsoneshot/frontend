@@ -1,5 +1,4 @@
-import React, { useState, useRef } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 
 interface BottomSheetProps {
@@ -9,8 +8,11 @@ interface BottomSheetProps {
 }
 
 const Overlay = styled.div<{ $isOpen: boolean }>`
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.4);
   z-index: 90;
   opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
@@ -31,15 +33,13 @@ const BottomSheetWrapper = styled.div.attrs<{
   $dragY: number;
   $isDragging: boolean;
 }>`
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   z-index: 100;
   transition: ${({ $isDragging }) =>
     $isDragging ? "none" : "transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)"};
-
-  pointer-events: ${({ $isOpen }) => ($isOpen ? "auto" : "none")};
 `;
 
 const Container = styled.div`
@@ -86,6 +86,19 @@ const BottomSheet = ({ isOpen, onClose, children }: BottomSheetProps) => {
   const startYRef = useRef(0);
   const currentDyRef = useRef(0);
 
+  // 바텀시트가 닫힐 때 dragY 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      // 렌더링 직후가 아니라, 잠깐의 텀을 두고 실행하여 충돌 방지
+      // CSS transition 시간(0.3s)만큼 기다렸다가 초기화하면 애니메이션 측면에서도 더 안전함
+      const timer = setTimeout(() => {
+        setDragY(0);
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
 
@@ -118,9 +131,7 @@ const BottomSheet = ({ isOpen, onClose, children }: BottomSheetProps) => {
     document.addEventListener("pointercancel", onUp);
   };
 
-  if (!isOpen) return null;
-
-  return createPortal(
+  return (
     <>
       <Overlay $isOpen={isOpen} onClick={onClose} />
       <BottomSheetWrapper
@@ -135,8 +146,7 @@ const BottomSheet = ({ isOpen, onClose, children }: BottomSheetProps) => {
           {children}
         </Container>
       </BottomSheetWrapper>
-    </>,
-    document.body,
+    </>
   );
 };
 

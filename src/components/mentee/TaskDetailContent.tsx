@@ -154,6 +154,7 @@ const FeedbackContent = styled.p<{ $expanded: boolean }>`
       -webkit-box-orient: vertical;
       overflow: hidden;
     `}
+  text-align: left;
 `;
 
 const MoreButton = styled.button`
