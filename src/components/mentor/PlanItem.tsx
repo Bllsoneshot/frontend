@@ -24,7 +24,7 @@ const PlanItem = ({
   onFeedbackClick,
 }: PlanItemProps) => {
   return (
-    <Container>
+    <Container onClick={onFeedbackClick}>
       <Content>
         <Header>
           <SubjectChip subject={subject} />
@@ -38,9 +38,11 @@ const PlanItem = ({
       <Action>
         {(status === "SUBMITTED" || status === "NOT_SUBMITTED") && (
           <StyledButton
-            variant={isFeedbackCompleted ? "gray" : "primary"}
-            onClick={onFeedbackClick}
-            disabled={isFeedbackCompleted}
+            variant="primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFeedbackClick?.();
+            }}
           >
             {isFeedbackCompleted ? "피드백 완료" : "피드백 하기"}
           </StyledButton>
