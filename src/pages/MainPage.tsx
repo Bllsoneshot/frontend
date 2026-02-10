@@ -135,7 +135,7 @@ const MainPage = () => {
 
   const [hasUnread, setHasUnread] = useState(false);
   const [calendarViewMode, setCalendarViewMode] = useState<"week" | "month">(
-    "week",
+    "week"
   );
   const [calendarMonthDate, setCalendarMonthDate] = useState<Date>(() => {
     const d = new Date();
@@ -212,7 +212,7 @@ const MainPage = () => {
 
   useEffect(() => {
     setCalendarMonthDate(
-      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
     );
   }, [selectedDate]);
 
@@ -278,7 +278,7 @@ const MainPage = () => {
   const handleSavePhotos = async (
     images: string[],
     files: File[],
-    markersData: ImageMarkerData[],
+    markersData: ImageMarkerData[]
   ) => {
     setUploadedImages(images);
     setUploadedFiles(files);
@@ -286,7 +286,7 @@ const MainPage = () => {
     if (files.length > 0 && selectedTaskId) {
       try {
         const uploadResults = await Promise.all(
-          files.map((file) => uploadFile(file, "/proof-shots")),
+          files.map((file) => uploadFile(file, "/proof-shots"))
         );
 
         const proofShots = uploadResults.map((result, idx) => ({
@@ -312,7 +312,7 @@ const MainPage = () => {
   const handleToggleDone = (
     taskId: number,
     taskName: string,
-    isCompleted: boolean,
+    isCompleted: boolean
   ) => {
     if (isCompleted) {
       handleCompleteWithoutModal(taskId);
@@ -341,7 +341,7 @@ const MainPage = () => {
       await toggleTaskComplete(
         pendingCompleteTask.taskId,
         selectedDate,
-        actualMinutes,
+        actualMinutes
       );
       await refreshTasks();
       setIsCompletionModalOpen(false);
@@ -409,10 +409,10 @@ const MainPage = () => {
             const res = await getTasksByDate(d);
             const remaining = Math.max(
               0,
-              res.taskAmount - res.completedTaskAmount,
+              res.taskAmount - res.completedTaskAmount
             );
             return [toKey(d), remaining] as const;
-          }),
+          })
         );
 
         if (ignore) return;
@@ -492,7 +492,7 @@ const MainPage = () => {
           <SubjectListWrapper $lock={anyOverlayOpen}>
             {SUBJECT_ORDER.map((subject) => {
               const subjectTasks = tasks.filter(
-                (task) => task.taskSubject === subject,
+                (task) => task.taskSubject === subject
               );
               const visibleTasks = isToggle
                 ? subjectTasks
@@ -524,7 +524,7 @@ const MainPage = () => {
                         handleToggleDone(
                           task.taskId,
                           task.taskName,
-                          task.completed,
+                          task.completed
                         )
                       }
                       onClick={() => handleCardClick(task.taskId)}

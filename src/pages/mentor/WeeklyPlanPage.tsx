@@ -96,12 +96,15 @@ const WeeklyPlanPage = () => {
                 hasQuestion: task.hasProofShot,
                 isFeedbackCompleted: task.hasFeedback,
                 onFeedbackClick: () => {
-                  navigate(`/mentor/mentees/${menteeId}/plan/${task.taskId}/feedback`, {
-                    state: { 
-                      taskName: task.taskName,
-                      status: status
+                  navigate(
+                    `/mentor/mentees/${menteeId}/plan/${task.taskId}/feedback`,
+                    {
+                      state: {
+                        taskName: task.taskName,
+                        status: status,
+                      },
                     }
-                  });
+                  );
                 },
               };
             }),

@@ -5,8 +5,8 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import { login } from "../api/auth";
 import { useAuthStore } from "../stores/authStore";
-import { typography } from "../styles/typography";
 import type { InputStatus } from "../@types/InputStatus";
+import LOGO from "../assets/images/logo_pc.svg?react";
 
 type ErrorType = "none" | "login_failed";
 
@@ -36,11 +36,11 @@ const LogoSection = styled.div`
   padding-bottom: 60px;
 `;
 
-const Logo = styled.h1`
-  ${typography.t30sb}
-  color: var(--color-primary-500);
-  margin: 0;
-`;
+// const Logo = styled.h1`
+//   ${typography.t30sb}
+//   color: var(--color-primary-500);
+//   margin: 0;
+// `;
 
 const FormSection = styled.div`
   display: flex;
@@ -128,7 +128,7 @@ const LoginPage = () => {
     <PageContainer>
       <ContentWrapper>
         <LogoSection>
-          <Logo>BllsOneShot</Logo>
+          <LOGO />
         </LogoSection>
 
         <FormSection>
