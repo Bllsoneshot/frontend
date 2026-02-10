@@ -28,7 +28,7 @@ const MENU_ITEMS: Array<{
   end?: boolean;
 }> = [
   { key: "plan", label: "주간 학습 계획", Icon: PlanIcon },
-  { key: "todo", label: "할 일 등록", Icon: TodoIcon, end: true },
+  { key: "todo", label: "할 일 등록", Icon: TodoIcon },
   { key: "resources", label: "자료 관리", Icon: ResourceIcon },
   { key: "reports", label: "주간 학습 리포트 발송", Icon: ReportIcon },
 ];
@@ -50,26 +50,23 @@ const MenteeSideMenuBar = ({ className }: Props) => {
   const { menteeId } = useParams();
   const location = useLocation();
 
-  useEffect(() => {
-    console.log("[SideBar mounted]");
-    console.log("[SideBar] pathname:", location.pathname);
-  }, []);
-
-  useEffect(() => {
-    console.log("[SideBar pathname changed]", location.pathname);
-  }, [location.pathname]);
+  const isTodoEdit =
+    location.pathname.includes("/todo/") && location.pathname.includes("/edit");
 
   return (
     <Wrap className={className}>
-      {MENU_ITEMS.map(({ key, label, Icon, end }) => (
-        <SideMenuItem
-          key={key}
-          to={`/mentor/mentees/${menteeId}/${key}`}
-          icon={<Icon />}
-          label={label}
-          end={end}
-        />
-      ))}
+      {MENU_ITEMS.map(({ key, label, Icon }) => {
+        const displayLabel = key === "todo" && isTodoEdit ? "할 일 수정" : label;
+
+        return (
+          <SideMenuItem
+            key={key}
+            to={`/mentor/mentees/${menteeId}/${key}`}
+            icon={<Icon />}
+            label={displayLabel}
+          />
+        );
+      })}
     </Wrap>
   );
 };

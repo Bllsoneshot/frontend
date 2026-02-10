@@ -44,6 +44,7 @@ function App() {
           <Route index element={<Navigate to="todo" replace />} />
 
           <Route path="todo" element={<TodoCreateSection />} />
+          <Route path="todo/:taskId/edit" element={<TodoCreateSection />} />
           <Route path="resources" element={<ResourceSection />} />
           <Route path="resources/new" element={<ResourceCreateForm />} />
           <Route
