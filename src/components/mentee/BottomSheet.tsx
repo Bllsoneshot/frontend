@@ -44,15 +44,17 @@ const BottomSheetWrapper = styled.div.attrs<{
 
 const Container = styled.div`
   width: 100%;
-  min-height: 349px;
+  min-height: 200px;
+  max-height: 90vh;
   height: auto;
   background-color: var(--color-white);
   border-radius: 20px 20px 0 0;
-  padding: 12px 16px 0px;
+  padding: 12px 16px calc(32px + env(safe-area-inset-bottom));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
 `;
 
 const HandleBarArea = styled.div`
