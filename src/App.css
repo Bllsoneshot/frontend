@@ -19,6 +19,7 @@
   --color-primary-700: #22875a;
 
   --color-white: #ffffff;
+  --color-gray-50: #f8f9fa;
   --color-gray-100: #e7e7e7;
   --color-gray-200: #b8b8b8;
   --color-gray-300: #a0a0a0;
@@ -34,12 +35,13 @@
 html,
 body {
   font-family: var(--font-sans);
+  padding: 0;
+  margin: 0;
 }
 
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
   font-family: var(--font-sans);
 }
