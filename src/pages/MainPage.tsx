@@ -84,11 +84,12 @@ const ToggleSwitchWrapper = styled.div`
 `;
 
 const ToggleSwitchLabel = styled.p`
-  ${typography.t16sb}
+  ${typography.t12r}
   color: var(--color-gray-500);
   margin-right: 8px;
 
   &:nth-child(1) {
+    ${typography.t16sb}
     text-align: left;
     margin: 0;
     flex: 1;
@@ -118,7 +119,7 @@ const SubjectGroup = styled.div`
 `;
 
 // 과목 순서 정의
-const SUBJECT_ORDER = ["KOREAN", "ENGLISH", "MATH"];
+const SUBJECT_ORDER = ["KOREAN", "ENGLISH", "MATH", "RESOURCE"];
 
 interface FeedbackDetailInfo {
   taskId: number;
@@ -132,7 +133,7 @@ const MainPage = () => {
 
   const [hasUnread, setHasUnread] = useState(false);
   const [calendarViewMode, setCalendarViewMode] = useState<"week" | "month">(
-    "week",
+    "week"
   );
   const [calendarMonthDate, setCalendarMonthDate] = useState<Date>(() => {
     const d = new Date();
@@ -181,11 +182,17 @@ const MainPage = () => {
       }
     };
 
-    window.visualViewport?.addEventListener("resize", handleVisualViewportResize);
+    window.visualViewport?.addEventListener(
+      "resize",
+      handleVisualViewportResize
+    );
     handleVisualViewportResize(); // 초기 실행
 
     return () => {
-      window.visualViewport?.removeEventListener("resize", handleVisualViewportResize);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        handleVisualViewportResize
+      );
     };
   }, []);
 
@@ -198,7 +205,7 @@ const MainPage = () => {
   const refreshTasks = async () => {
     try {
       setIsLoading(true);
-      const response = await getTasksByDate(selectedDate);
+      const response = await getTasksByDate(selectedDate, true);
       setTasks(response.tasks);
       setDashboardSummary({
         todoCount: {
@@ -225,7 +232,7 @@ const MainPage = () => {
 
   useEffect(() => {
     setCalendarMonthDate(
-      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
     );
   }, [selectedDate]);
 
@@ -292,7 +299,7 @@ const MainPage = () => {
   const handleSavePhotos = async (
     images: string[],
     files: File[],
-    markersData: ImageMarkerData[],
+    markersData: ImageMarkerData[]
   ) => {
     setUploadedImages(images);
     setUploadedFiles(files);
@@ -316,7 +323,7 @@ const MainPage = () => {
               };
             }
             return null;
-          }),
+          })
         );
 
         const validProofShots = proofShots.filter((ps) => ps !== null);
@@ -337,7 +344,7 @@ const MainPage = () => {
   const handleToggleDone = (
     taskId: number,
     taskName: string,
-    isCompleted: boolean,
+    isCompleted: boolean
   ) => {
     if (isCompleted) {
       handleCompleteWithoutModal(taskId);
@@ -365,7 +372,7 @@ const MainPage = () => {
       await toggleTaskComplete(
         pendingCompleteTask.taskId,
         selectedDate,
-        actualMinutes,
+        actualMinutes
       );
       await refreshTasks();
       setIsCompletionModalOpen(false);
@@ -430,13 +437,13 @@ const MainPage = () => {
 
         const results = await Promise.all(
           days.map(async (d) => {
-            const res = await getTasksByDate(d);
+            const res = await getTasksByDate(d, true);
             const remaining = Math.max(
               0,
-              res.taskAmount - res.completedTaskAmount,
+              res.taskAmount - res.completedTaskAmount
             );
             return [toKey(d), remaining] as const;
-          }),
+          })
         );
 
         if (ignore) return;
@@ -515,9 +522,12 @@ const MainPage = () => {
 
           <SubjectListWrapper>
             {SUBJECT_ORDER.map((subject) => {
-              const subjectTasks = tasks.filter(
-                (task) => task.taskSubject === subject,
-              );
+              const subjectTasks = tasks.filter((task) => {
+                if (subject === "RESOURCE") {
+                  return task.resource;
+                }
+                return task.taskSubject === subject && !task.resource;
+              });
               const visibleTasks = isToggle
                 ? subjectTasks
                 : subjectTasks.filter((task) => !task.completed);
@@ -548,7 +558,7 @@ const MainPage = () => {
                         handleToggleDone(
                           task.taskId,
                           task.taskName,
-                          task.completed,
+                          task.completed
                         )
                       }
                       onClick={() => handleCardClick(task.taskId)}
