@@ -184,23 +184,17 @@ const MainPage = () => {
 
     window.visualViewport?.addEventListener(
       "resize",
-      handleVisualViewportResize
+      handleVisualViewportResize,
     );
     handleVisualViewportResize(); // 초기 실행
 
     return () => {
       window.visualViewport?.removeEventListener(
         "resize",
-        handleVisualViewportResize
+        handleVisualViewportResize,
       );
     };
   }, []);
-
-  const anyOverlayOpen =
-    isBottomSheetOpen ||
-    isPhotoUploadOpen ||
-    isFeedbackDetailOpen ||
-    isCompletionModalOpen;
 
   const refreshTasks = async () => {
     try {
