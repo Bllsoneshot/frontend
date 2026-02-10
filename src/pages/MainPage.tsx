@@ -33,7 +33,7 @@ import { getNotifications } from "../api/alarm";
 const MobileScreen = styled.div`
   min-width: 375px;
   max-width: 430px;
-  height: 100dvh;
+  height: var(--vh, 100dvh);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -49,6 +49,7 @@ const CalendarAndTodoWrapper = styled.div<{ $mode: "week" | "month" }>`
 
   flex: 1;
   min-height: 0;
+  flex-shrink: 0; /* 부모 높이가 줄어도 캘린더 영역은 찌그러지지 않음 */
 
   /* 주간일 때만 간격 유지 */
   gap: ${({ $mode }) => ($mode === "week" ? "16px" : "0")};
@@ -60,6 +61,7 @@ const DashboardWrapper = styled.div`
   box-sizing: border-box;
   padding: 0 16px;
   border-bottom: 1px solid var(--color-gray-100);
+  flex-shrink: 0; /* 대시보드 높이 고정 */
 `;
 
 const TodoSectionWrapper = styled.div`
@@ -142,7 +144,7 @@ const MainPage = () => {
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"DETAIL" | "FORM">("FORM");
-  const [isToggle, setIsToggle] = useState(false);
+  const [isToggle, setIsToggle] = useState(true);
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [tasks, setTasks] = useState<DailyTask[]>([]);
@@ -170,6 +172,28 @@ const MainPage = () => {
   const [isFeedbackDetailOpen, setIsFeedbackDetailOpen] = useState(false);
   const [feedbackDetailInfo, setFeedbackDetailInfo] =
     useState<FeedbackDetailInfo | null>(null);
+
+  useEffect(() => {
+    const handleVisualViewportResize = () => {
+      if (window.visualViewport) {
+        const height = window.visualViewport.height;
+        document.documentElement.style.setProperty("--vh", `${height}px`);
+      }
+    };
+
+    window.visualViewport?.addEventListener("resize", handleVisualViewportResize);
+    handleVisualViewportResize(); // 초기 실행
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", handleVisualViewportResize);
+    };
+  }, []);
+
+  const anyOverlayOpen =
+    isBottomSheetOpen ||
+    isPhotoUploadOpen ||
+    isFeedbackDetailOpen ||
+    isCompletionModalOpen;
 
   const refreshTasks = async () => {
     try {
