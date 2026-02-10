@@ -148,7 +148,6 @@ const StudyForm = ({
     initialDates,
     initialTaskNames,
     initialGoalMinutes,
-    dates,
   ]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);

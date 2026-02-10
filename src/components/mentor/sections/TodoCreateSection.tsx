@@ -33,6 +33,9 @@ const TodoCreateSection = () => {
         }
       };
       loadTask();
+    } else {
+      // 수정 모드가 아닐 때는 데이터를 비움
+      setEditData(null);
     }
   }, [isEditMode, editTaskId]);
 
@@ -43,19 +46,26 @@ const TodoCreateSection = () => {
 
   return (
     <StudyForm
+      key={location.key} // location.key를 사용하여 모든 라우트 전환 시 컴포넌트 강제 재마운트
       mode="todo"
       isEdit={isEditMode}
-      title={isEditMode ? "할 일 수정" : "할 일 등록"}
+      // title={isEditMode ? "할 일 수정" : "할 일 등록"} // 제거됨
       submitText={isEditMode ? "할 일 수정하기" : "할 일 등록하기"}
-      initialSubject={editData?.subject as SubjectKey}
-      initialDates={editData?.dates}
-      initialTaskNames={editData?.taskNames}
-      initialGoalMinutes={editData?.goalMinutes}
-      initialFileId={pdfAttachment?.fileId}
-      initialFileName={pdfAttachment?.fileName}
-      initialLinkUrl={linkAttachment?.link}
+      initialSubject={isEditMode ? (editData?.subject as SubjectKey) : undefined}
+      initialDates={isEditMode ? editData?.dates : undefined}
+      initialTaskNames={isEditMode ? editData?.taskNames : undefined}
+      initialGoalMinutes={isEditMode ? editData?.goalMinutes : undefined}
+      initialFileId={isEditMode ? pdfAttachment?.fileId : undefined}
+      initialFileName={isEditMode ? pdfAttachment?.fileName : undefined}
+      initialLinkUrl={isEditMode ? linkAttachment?.link : undefined}
       initialResourceMode={
-        pdfAttachment ? "FILE" : linkAttachment ? "LINK" : "CHOICE"
+        isEditMode
+          ? pdfAttachment
+            ? "FILE"
+            : linkAttachment
+            ? "LINK"
+            : "CHOICE"
+          : "CHOICE"
       }
       onSubmit={async (payload) => {
         const p = payload as StudyFormTodoPayload;
