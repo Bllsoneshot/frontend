@@ -167,7 +167,7 @@ export default function MonthlyCalendar({
     const dy = y - startRef.current.y;
 
     // 세로 스크롤로 결정된 경우는 아무것도 하지 않음
-    if (decidedRef.current === "V") {
+    if (decidedRef.current === "V" || Math.abs(dy) > Math.abs(dx)) {
       startRef.current = null;
       decidedRef.current = null;
       setIsSwiping(false);

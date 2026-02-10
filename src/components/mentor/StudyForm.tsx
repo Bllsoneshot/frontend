@@ -50,7 +50,7 @@ interface Props {
   showGoalMinutes?: boolean;
   showTaskList?: boolean;
 
-  initialSubject?: SubjectKey;
+  initialSubject?: SubjectKey1;
   initialResourceTitle?: string;
   initialResourceMode?: ResourceMode;
   initialFileId?: number | null;

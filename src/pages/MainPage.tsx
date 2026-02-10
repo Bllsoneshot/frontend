@@ -181,19 +181,19 @@ const MainPage = () => {
       }
     };
 
-    window.visualViewport?.addEventListener("resize", handleVisualViewportResize);
+    window.visualViewport?.addEventListener(
+      "resize",
+      handleVisualViewportResize,
+    );
     handleVisualViewportResize(); // 초기 실행
 
     return () => {
-      window.visualViewport?.removeEventListener("resize", handleVisualViewportResize);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        handleVisualViewportResize,
+      );
     };
   }, []);
-
-  const anyOverlayOpen =
-    isBottomSheetOpen ||
-    isPhotoUploadOpen ||
-    isFeedbackDetailOpen ||
-    isCompletionModalOpen;
 
   const refreshTasks = async () => {
     try {
