@@ -9,9 +9,10 @@ import ImportantStar from "../../components/mentor/ImportantStar";
 import Indicator from "../../components/mentee/Indicator";
 import LeftArrowIcon from "../../assets/images/icon/left.svg?react";
 import RightArrowIcon from "../../assets/images/icon/right.svg?react";
-import DeleteIcon from "../../assets/images/icon/minus.svg?react";
+import DeleteIcon from "../../assets/images/icon/minus-1.svg?react";
 import UploadIcon from "../../assets/images/icon/upload.svg?react";
 import PersonIcon from "../../assets/images/icon/person.svg?react";
+import PenIcon from "../../assets/images/icon/pen.svg?react";
 
 import {
   getMentorTaskDetail,
@@ -48,6 +49,7 @@ interface FeedbackState {
   menteeName: string;
   images: FeedbackImage[];
   generalReview: string;
+  isEditMode: boolean;
 }
 
 const ImageMarker = ({
@@ -88,16 +90,20 @@ const FeedbackDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const initialTaskName = location.state?.taskName || "";
+  const taskStatus = location.state?.status;
+  const isReadOnly = taskStatus === "SCHEDULED";
 
   const [state, setState] = useState<FeedbackState>({
     todoTitle: initialTaskName,
     menteeName: "",
     generalReview: "",
     images: [],
+    isEditMode: false,
   });
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const isApiProcessing = useRef(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageRef = useRef<HTMLImageElement>(null);
   const feedbackRefs = useRef<Record<string | number, HTMLDivElement | null>>(
@@ -109,7 +115,8 @@ const FeedbackDetailPage = () => {
   // --- Data Fetching ---
 
   const transformResponse = async (
-    data: MentorTaskDetailResponse
+    data: MentorTaskDetailResponse,
+    isEditMode: boolean
   ): Promise<FeedbackState> => {
     let menteeOrder = 1;
     let mentorOrder = 1;
@@ -169,6 +176,7 @@ const FeedbackDetailPage = () => {
       menteeName: data.menteeName,
       generalReview: data.generalComment || "",
       images,
+      isEditMode,
     };
   };
 
@@ -178,27 +186,45 @@ const FeedbackDetailPage = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        let data = await getMentorTaskDetail(taskId);
+        let data: MentorTaskDetailResponse | null = null;
+        let isEditMode = false;
 
-        const hasMentorFeedback =
-          data.generalComment ||
-          data.proofShots.some((ps) => ps.feedbacks.length > 0);
+        // 1. 임시저장 데이터 먼저 확인
+        try {
+          const tempData = await getTemporaryFeedback(taskId);
+          const hasTempContent =
+            tempData.generalComment ||
+            tempData.proofShots.some(
+              (ps) =>
+                ps.feedbacks.length > 0 || ps.questions.some((q) => q.answer)
+            );
 
-        if (!hasMentorFeedback) {
-          try {
-            const tempData = await getTemporaryFeedback(taskId);
-            if (tempData) {
-              data = tempData;
-            }
-          } catch (tempErr) {
-            console.log("No temporary feedback found or error:", tempErr);
+          if (hasTempContent) {
+            data = tempData;
+            isEditMode = true;
+            console.log("Loaded from temporary feedback");
+          }
+        } catch (tempErr) {
+          console.log("No temporary feedback found or error:", tempErr);
+        }
+
+        // 2. 임시저장이 없거나 데이터가 비어있으면 상세조회 호출
+        if (!data) {
+          data = await getMentorTaskDetail(taskId);
+          const hasMentorFeedback =
+            data.generalComment ||
+            data.proofShots.some((ps) => ps.feedbacks.length > 0);
+
+          if (hasMentorFeedback) {
+            isEditMode = true;
+            console.log("Loaded from finalized feedback");
           }
         }
 
-        const transformed = await transformResponse(data);
+        const transformed = await transformResponse(data, isEditMode);
         setState(transformed);
       } catch (err) {
-        console.error("Mentor task detail fetch failed:", err);
+        console.error("Mentor task data fetch failed:", err);
         alert("데이터를 불러오는데 실패했습니다.");
       } finally {
         setLoading(false);
@@ -211,10 +237,13 @@ const FeedbackDetailPage = () => {
   // --- Auto Save (Debounce 10s) ---
 
   useEffect(() => {
-    if (!taskId || loading) return;
+    if (!taskId || loading || isReadOnly || saving) return;
 
     const timer = setTimeout(async () => {
+      if (isApiProcessing.current || saving) return;
+
       try {
+        isApiProcessing.current = true;
         const payload: SaveTemporaryFeedbackRequest = {
           generalComment: state.generalReview,
           proofShotFeedbacks: state.images.map((img) => ({
@@ -242,16 +271,18 @@ const FeedbackDetailPage = () => {
         console.log("임시저장 완료");
       } catch (err) {
         console.error("임시저장 실패:", err);
+      } finally {
+        isApiProcessing.current = false;
       }
     }, 10000); // 10 seconds
 
     return () => clearTimeout(timer);
-  }, [state.generalReview, state.images, taskId, loading]);
+  }, [state.generalReview, state.images, taskId, loading, saving, isReadOnly]);
 
   // --- Handlers ---
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageRef.current || state.images.length === 0) return;
+    if (isReadOnly || !imageRef.current || state.images.length === 0) return;
 
     const rect = imageRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -342,9 +373,10 @@ const FeedbackDetailPage = () => {
   };
 
   const handleSave = async () => {
-    if (!isSavable || saving || !taskId) return;
+    if (!isSavable || saving || !taskId || isApiProcessing.current) return;
 
     setSaving(true);
+    isApiProcessing.current = true;
     try {
       const payload: SaveFeedbackRequest = {
         generalComment: state.generalReview,
@@ -378,6 +410,7 @@ const FeedbackDetailPage = () => {
       alert("저장에 실패했습니다.");
     } finally {
       setSaving(false);
+      isApiProcessing.current = false;
     }
   };
 
@@ -415,17 +448,32 @@ const FeedbackDetailPage = () => {
 
       <ContentHeader>
         <HeaderLeft>
-          <Title>{state.todoTitle}</Title>
-          <MenteeName>{state.menteeName} 멘티</MenteeName>
+          <TitleWrapper>
+            <Title>{state.todoTitle}</Title>
+            <EditIcon
+              onClick={() => {
+                const menteeId = location.pathname.split("/")[3];
+                navigate(`/mentor/mentees/${menteeId}/todo/${taskId}/edit`);
+              }}
+              aria-label="수정하기"
+            />
+          </TitleWrapper>
+          <MenteeName>{state.menteeName}</MenteeName>
         </HeaderLeft>
         <HeaderRight>
-          <HeaderButton
-            variant="primary"
-            disabled={!isSavable || saving}
-            onClick={handleSave}
-          >
-            {saving ? "저장 중..." : "최종 피드백 저장하기"}
-          </HeaderButton>
+          {!isReadOnly && (
+            <HeaderButton
+              variant="primary"
+              disabled={!isSavable || saving}
+              onClick={handleSave}
+            >
+              {saving
+                ? "저장 중..."
+                : state.isEditMode
+                ? "최종 피드백 수정하기"
+                : "최종 피드백 저장하기"}
+            </HeaderButton>
+          )}
         </HeaderRight>
       </ContentHeader>
 
@@ -498,14 +546,17 @@ const FeedbackDetailPage = () => {
               멘토의 총평 <Required>*</Required>
             </FormLabel>
             <Textarea
-              placeholder="학생의 전반적인 학습 태도와 풀이 완성도에 대한 총평을 작성해주세요."
+              placeholder={
+                "학생의 전반적인 학습 태도와 풀이 완성도에 대한 총평을 작성해주세요."
+              }
               value={state.generalReview}
               onChange={(e) =>
                 setState({ ...state, generalReview: e.target.value })
               }
               maxLength={200}
-              showCount
+              showCount={!isReadOnly}
               countPosition="bottom"
+              disabled={isReadOnly}
             />
           </FormGroup>
 
@@ -531,12 +582,17 @@ const FeedbackDetailPage = () => {
                         </BadgeGroup>
                       </CardHeader>
                       <Textarea
-                        placeholder="질문에 대한 답변을 작성해주세요."
+                        placeholder={
+                          isReadOnly
+                            ? "질문이 없습니다."
+                            : "질문에 대한 답변을 작성해주세요."
+                        }
                         value={m.reply || ""}
                         onChange={(e) =>
                           updateMarkerReply(m.id, e.target.value)
                         }
                         rows={3}
+                        disabled={isReadOnly}
                       />
                     </MenteeQuestionCard>
                   </div>
@@ -576,14 +632,18 @@ const FeedbackDetailPage = () => {
                         />
                       </BadgeGroup>{" "}
                       <CardActions>
-                        <ImportantStar
-                          value={!!m.isStarred}
-                          onChange={() => toggleMarkerStar(m.id)}
-                          size={24}
-                        />
-                        <DeleteButton onClick={() => deleteMarker(m.id)}>
-                          <DeleteIcon />
-                        </DeleteButton>
+                        {!isReadOnly && (
+                          <>
+                            <ImportantStar
+                              value={!!m.isStarred}
+                              onChange={() => toggleMarkerStar(m.id)}
+                              size={24}
+                            />
+                            <DeleteButton onClick={() => deleteMarker(m.id)}>
+                              <DeleteIcon />
+                            </DeleteButton>
+                          </>
+                        )}
                       </CardActions>
                     </CardHeader>
                     <Textarea
@@ -591,6 +651,7 @@ const FeedbackDetailPage = () => {
                       value={m.reply || ""}
                       onChange={(e) => updateMarkerReply(m.id, e.target.value)}
                       rows={3}
+                      disabled={isReadOnly}
                     />
                   </FeedbackCard>
                 </div>
@@ -669,7 +730,7 @@ const UserIcon = styled(PersonIcon)`
 const ContentHeader = styled.div`
   height: 90px;
   min-height: 90px;
-  padding: 0 40px;
+  padding: 0 120px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -683,15 +744,36 @@ const HeaderLeft = styled.div`
   gap: 4px;
 `;
 
+const TitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 const Title = styled.h1`
   ${typography.t24sb}
   color: var(--color-black);
   margin: 0;
 `;
 
+const EditIcon = styled(PenIcon)`
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  path {
+    stroke: var(--color-gray-400);
+  }
+  &:hover {
+    path {
+      stroke: var(--color-blue-500);
+    }
+  }
+`;
+
 const MenteeName = styled.span`
   ${typography.t16r}
   color: var(--color-gray-400);
+  text-align: left;
 `;
 
 const HeaderRight = styled.div``;
@@ -712,6 +794,7 @@ const MainContent = styled.main`
   flex: 1;
   display: flex;
   overflow: hidden;
+  padding: 0 120px;
 `;
 
 const ViewerSection = styled.section`
@@ -831,7 +914,7 @@ const FormSection = styled.section`
   flex: 6;
   min-width: 0;
   height: 100%;
-  padding: 32px 40px;
+  padding: 32px 0px 32px 40px;
   overflow-y: auto;
   box-sizing: border-box;
   display: flex;
