@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { typography } from "../../styles/typography";
 import Alarm from "../Alarm";
+import LOGO from "../../assets/images/logo_mobile.svg?react";
 
 interface Props {
   hasUnread?: boolean;
@@ -19,8 +19,7 @@ const MenteeHeader = ({
     <Wrap className={className}>
       <Inner>
         <LogoButton type="button" onClick={onClickLogo}>
-          <LogoMock>로고</LogoMock>
-          {/* <Logo src={logoSrc} alt="로고" /> */}
+          <LOGO />
         </LogoButton>
 
         <Right>
@@ -36,7 +35,6 @@ const Wrap = styled.header`
   height: 48px;
   background: var(--color-white);
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-
 `;
 
 const Inner = styled.div`
@@ -66,19 +64,19 @@ const LogoButton = styled.button`
   }
 `;
 
-const LogoMock = styled.div`
-  width: 45px;
-  height: 24px;
+// const LogoMock = styled.div`
+//   width: 45px;
+//   height: 24px;
 
-  background: var(--color-primary-500);
-  color: var(--color-black);
+//   background: var(--color-primary-500);
+//   color: var(--color-black);
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
 
-  ${typography.t14sb}
-`;
+//   ${typography.t14sb}
+// `;
 
 const Right = styled.div`
   display: inline-flex;
