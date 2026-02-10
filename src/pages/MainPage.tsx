@@ -62,14 +62,12 @@ const DashboardWrapper = styled.div`
   border-bottom: 1px solid var(--color-gray-100);
 `;
 
-const TodoSectionWrapper = styled.div<{ $lock: boolean }>`
+const TodoSectionWrapper = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
-
-  ${({ $lock }) => ($lock ? "pointer-events: none;" : "")}
 `;
 
 const ToggleSwitchWrapper = styled.div`
@@ -96,17 +94,14 @@ const ToggleSwitchLabel = styled.p`
   }
 `;
 
-const SubjectListWrapper = styled.div<{ $lock: boolean }>`
+const SubjectListWrapper = styled.div`
   flex: 1;
 
   min-height: 0;
 
-  overflow-y: ${({ $lock }) => ($lock ? "hidden" : "auto")};
+  overflow-y: auto;
   padding: 8px 16px;
   box-sizing: border-box;
-
-  /* 스크롤 잠금 중엔 터치 스크롤도 차단 */
-  ${({ $lock }) => ($lock ? "touch-action: none;" : "")}
 
   &::-webkit-scrollbar {
     display: none;
@@ -135,7 +130,7 @@ const MainPage = () => {
 
   const [hasUnread, setHasUnread] = useState(false);
   const [calendarViewMode, setCalendarViewMode] = useState<"week" | "month">(
-    "week"
+    "week",
   );
   const [calendarMonthDate, setCalendarMonthDate] = useState<Date>(() => {
     const d = new Date();
@@ -176,12 +171,6 @@ const MainPage = () => {
   const [feedbackDetailInfo, setFeedbackDetailInfo] =
     useState<FeedbackDetailInfo | null>(null);
 
-  const anyOverlayOpen =
-    isBottomSheetOpen ||
-    isPhotoUploadOpen ||
-    isFeedbackDetailOpen ||
-    isCompletionModalOpen;
-
   const refreshTasks = async () => {
     try {
       setIsLoading(true);
@@ -212,7 +201,7 @@ const MainPage = () => {
 
   useEffect(() => {
     setCalendarMonthDate(
-      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
     );
   }, [selectedDate]);
 
@@ -278,7 +267,7 @@ const MainPage = () => {
   const handleSavePhotos = async (
     images: string[],
     files: File[],
-    markersData: ImageMarkerData[]
+    markersData: ImageMarkerData[],
   ) => {
     setUploadedImages(images);
     setUploadedFiles(files);
@@ -286,7 +275,7 @@ const MainPage = () => {
     if (files.length > 0 && selectedTaskId) {
       try {
         const uploadResults = await Promise.all(
-          files.map((file) => uploadFile(file, "/proof-shots"))
+          files.map((file) => uploadFile(file, "/proof-shots")),
         );
 
         const proofShots = uploadResults.map((result, idx) => ({
@@ -305,21 +294,16 @@ const MainPage = () => {
     }
   };
 
-  const blurActiveElement = () => {
-    (document.activeElement as HTMLElement | null)?.blur?.();
-  };
-
   const handleToggleDone = (
     taskId: number,
     taskName: string,
-    isCompleted: boolean
+    isCompleted: boolean,
   ) => {
     if (isCompleted) {
       handleCompleteWithoutModal(taskId);
       return;
     }
 
-    blurActiveElement();
     setPendingCompleteTask({ taskId, taskName });
     setIsCompletionModalOpen(true);
   };
@@ -341,7 +325,7 @@ const MainPage = () => {
       await toggleTaskComplete(
         pendingCompleteTask.taskId,
         selectedDate,
-        actualMinutes
+        actualMinutes,
       );
       await refreshTasks();
       setIsCompletionModalOpen(false);
@@ -409,10 +393,10 @@ const MainPage = () => {
             const res = await getTasksByDate(d);
             const remaining = Math.max(
               0,
-              res.taskAmount - res.completedTaskAmount
+              res.taskAmount - res.completedTaskAmount,
             );
             return [toKey(d), remaining] as const;
-          })
+          }),
         );
 
         if (ignore) return;
@@ -478,7 +462,7 @@ const MainPage = () => {
             />
           </DashboardWrapper>
         ) : null}
-        <TodoSectionWrapper $lock={anyOverlayOpen}>
+        <TodoSectionWrapper>
           <ToggleSwitchWrapper>
             <ToggleSwitchLabel>
               {calendarViewMode === "month"
@@ -489,10 +473,10 @@ const MainPage = () => {
             <ToggleSwitch on={isToggle} onChange={setIsToggle} />
           </ToggleSwitchWrapper>
 
-          <SubjectListWrapper $lock={anyOverlayOpen}>
+          <SubjectListWrapper>
             {SUBJECT_ORDER.map((subject) => {
               const subjectTasks = tasks.filter(
-                (task) => task.taskSubject === subject
+                (task) => task.taskSubject === subject,
               );
               const visibleTasks = isToggle
                 ? subjectTasks
@@ -524,7 +508,7 @@ const MainPage = () => {
                         handleToggleDone(
                           task.taskId,
                           task.taskName,
-                          task.completed
+                          task.completed,
                         )
                       }
                       onClick={() => handleCardClick(task.taskId)}
@@ -537,68 +521,60 @@ const MainPage = () => {
         </TodoSectionWrapper>
       </CalendarAndTodoWrapper>
 
-      {isBottomSheetOpen ? (
-        <BottomSheet isOpen={isBottomSheetOpen} onClose={closeSheet}>
-          {viewMode === "DETAIL" && selectedTaskId ? (
-            <TaskDetailContainer
-              taskId={selectedTaskId}
-              onEditClick={handleSwitchToEdit}
-              onDeleteSuccess={handleDeleteSuccess}
-              onOpenPhotoUpload={handleOpenPhotoUpload}
-              onOpenFeedbackDetail={(taskInfo) => {
-                openFeedbackDetail({
-                  taskId: selectedTaskId,
-                  subject: taskInfo.subject,
-                  title: taskInfo.title,
-                });
-              }}
-            />
-          ) : (
-            <TodoForm
-              mode={selectedTaskId ? "edit" : "create"}
-              taskId={selectedTaskId}
-              onSubmit={handleFormSubmit}
-            />
-          )}
-        </BottomSheet>
-      ) : null}
+      <BottomSheet isOpen={isBottomSheetOpen} onClose={closeSheet}>
+        {viewMode === "DETAIL" && selectedTaskId ? (
+          <TaskDetailContainer
+            taskId={selectedTaskId}
+            onEditClick={handleSwitchToEdit}
+            onDeleteSuccess={handleDeleteSuccess}
+            onOpenPhotoUpload={handleOpenPhotoUpload}
+            onOpenFeedbackDetail={(taskInfo) => {
+              openFeedbackDetail({
+                taskId: selectedTaskId,
+                subject: taskInfo.subject,
+                title: taskInfo.title,
+              });
+            }}
+          />
+        ) : (
+          <TodoForm
+            mode={selectedTaskId ? "edit" : "create"}
+            taskId={selectedTaskId}
+            onSubmit={handleFormSubmit}
+          />
+        )}
+      </BottomSheet>
 
       {/* 사진 업로드 오버레이 */}
-      {isPhotoUploadOpen ? (
-        <PhotoUploadOverlay
-          isOpen={isPhotoUploadOpen}
-          onClose={() => {
-            setIsPhotoUploadOpen(false);
-            closeSheet();
-          }}
-          initialImages={uploadedImages}
-          initialFiles={uploadedFiles}
-          onSave={handleSavePhotos}
-          subject={photoUploadInfo?.subject ?? ""}
-          title={photoUploadInfo?.title ?? ""}
-        />
-      ) : null}
+      <PhotoUploadOverlay
+        isOpen={isPhotoUploadOpen}
+        onClose={() => {
+          setIsPhotoUploadOpen(false);
+          closeSheet();
+        }}
+        initialImages={uploadedImages}
+        initialFiles={uploadedFiles}
+        onSave={handleSavePhotos}
+        subject={photoUploadInfo?.subject ?? ""}
+        title={photoUploadInfo?.title ?? ""}
+      />
 
       {/* 피드백 상세 오버레이 */}
-      {isFeedbackDetailOpen && feedbackDetailInfo ? (
-        <FeedbackDetailOverlay
-          isOpen={isFeedbackDetailOpen}
-          onClose={closeFeedbackDetail}
-          taskId={feedbackDetailInfo?.taskId ?? null}
-          subject={feedbackDetailInfo?.subject ?? ""}
-          title={feedbackDetailInfo?.title ?? ""}
-        />
-      ) : null}
+      <FeedbackDetailOverlay
+        isOpen={isFeedbackDetailOpen}
+        onClose={closeFeedbackDetail}
+        taskId={feedbackDetailInfo?.taskId ?? null}
+        subject={feedbackDetailInfo?.subject ?? ""}
+        title={feedbackDetailInfo?.title ?? ""}
+      />
 
       {/* 완료 시간 입력 모달 */}
-      {isCompletionModalOpen ? (
-        <TaskCompletionModal
-          isOpen={isCompletionModalOpen}
-          onClose={handleCompletionModalClose}
-          onSave={handleCompletionModalSave}
-          title={pendingCompleteTask?.taskName ?? ""}
-        />
-      ) : null}
+      <TaskCompletionModal
+        isOpen={isCompletionModalOpen}
+        onClose={handleCompletionModalClose}
+        onSave={handleCompletionModalSave}
+        title={pendingCompleteTask?.taskName ?? ""}
+      />
     </MobileScreen>
   );
 };
