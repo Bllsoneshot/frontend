@@ -133,7 +133,7 @@ const MainPage = () => {
 
   const [hasUnread, setHasUnread] = useState(false);
   const [calendarViewMode, setCalendarViewMode] = useState<"week" | "month">(
-    "week"
+    "week",
   );
   const [calendarMonthDate, setCalendarMonthDate] = useState<Date>(() => {
     const d = new Date();
@@ -200,7 +200,8 @@ const MainPage = () => {
     try {
       setIsLoading(true);
       const response = await getTasksByDate(selectedDate, true);
-      setTasks(response.tasks);
+      setTasks(Array.isArray(response.tasks) ? response.tasks : []);
+
       setDashboardSummary({
         todoCount: {
           done: response.completedTaskAmount,
@@ -226,7 +227,7 @@ const MainPage = () => {
 
   useEffect(() => {
     setCalendarMonthDate(
-      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
     );
   }, [selectedDate]);
 
@@ -293,7 +294,7 @@ const MainPage = () => {
   const handleSavePhotos = async (
     images: string[],
     files: File[],
-    markersData: ImageMarkerData[]
+    markersData: ImageMarkerData[],
   ) => {
     setUploadedImages(images);
     setUploadedFiles(files);
@@ -317,7 +318,7 @@ const MainPage = () => {
               };
             }
             return null;
-          })
+          }),
         );
 
         const validProofShots = proofShots.filter((ps) => ps !== null);
@@ -338,7 +339,7 @@ const MainPage = () => {
   const handleToggleDone = (
     taskId: number,
     taskName: string,
-    isCompleted: boolean
+    isCompleted: boolean,
   ) => {
     if (isCompleted) {
       handleCompleteWithoutModal(taskId);
@@ -366,7 +367,7 @@ const MainPage = () => {
       await toggleTaskComplete(
         pendingCompleteTask.taskId,
         selectedDate,
-        actualMinutes
+        actualMinutes,
       );
       await refreshTasks();
       setIsCompletionModalOpen(false);
@@ -434,10 +435,10 @@ const MainPage = () => {
             const res = await getTasksByDate(d, true);
             const remaining = Math.max(
               0,
-              res.taskAmount - res.completedTaskAmount
+              res.taskAmount - res.completedTaskAmount,
             );
             return [toKey(d), remaining] as const;
-          })
+          }),
         );
 
         if (ignore) return;
@@ -461,8 +462,14 @@ const MainPage = () => {
 
   const refreshHasUnread = async () => {
     try {
-      const list = await getNotifications();
-      const has = list.some((n) => n.status !== "READ");
+      const res = await getNotifications();
+      const list = Array.isArray(res)
+        ? res
+        : Array.isArray((res as any)?.notifications)
+          ? (res as any).notifications
+          : [];
+
+      const has = list.some((n: any) => n?.status && n.status !== "READ");
       setHasUnread(has);
     } catch (e) {
       console.error("알림 상태 조회 실패", e);
@@ -552,7 +559,7 @@ const MainPage = () => {
                         handleToggleDone(
                           task.taskId,
                           task.taskName,
-                          task.completed
+                          task.completed,
                         )
                       }
                       onClick={() => handleCardClick(task.taskId)}
