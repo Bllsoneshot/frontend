@@ -79,13 +79,37 @@ function App() {
             <MainPage />
           </ProtectedRoute>
         }
-      >
-        <Route path="mypage" element={<MyPage />} />
-        <Route path="mypage/:subject" element={<SubjectProgressPage />} />
-        <Route path="alarm" element={<NotificationPage />} />
-        {/* 4. 그 외 없는 페이지 처리 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
+      />
+
+      <Route
+        path="/mypage"
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_MENTEE"]}>
+            <MyPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/mypage/:subject"
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_MENTEE"]}>
+            <SubjectProgressPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/alarm"
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_MENTEE"]}>
+            <NotificationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 4. 그 외 없는 페이지 처리 */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
